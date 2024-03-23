@@ -1,11 +1,9 @@
-package com.example.composelearning
+package com.example.composelearning.composable
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -19,19 +17,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import com.example.composelearning.db.model.Gym
+import com.example.composelearning.R
 
 @Composable
-fun GymItemCard(gym: Gym,  onClick: (Int) -> Unit) {
+fun GymItemCard(gym: Gym, onClick: (Int) -> Unit) {
     val isFavouriteState by remember { mutableStateOf(false) }
-    val icon = if (gym.isFavourite){
+    val icon = if (gym.isOpen){
         Icons.Filled.Favorite
     }else{
         Icons.Filled.FavoriteBorder
@@ -70,12 +68,12 @@ fun GymIcon(modifier: Modifier){
 fun GymDetails(item: Gym, modifier: Modifier){
     Column(modifier = modifier) {
         Text(
-            text = item.name,
+            text = item.gymName,
             style = MaterialTheme.typography.bodyLarge,
             color = MaterialTheme.colorScheme.primary
         )
         Text(
-            text = item.place,
+            text = item.gymLocation,
             style = MaterialTheme.typography.bodyMedium,
             color = Color.Gray
         )
