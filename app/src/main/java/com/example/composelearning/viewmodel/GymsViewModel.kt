@@ -5,11 +5,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.composelearning.db.model.Gym
 import com.example.composelearning.network.GymsApiService
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -18,7 +19,6 @@ class GymsViewModel(
 ): ViewModel() {
     var state by mutableStateOf(emptyList<Gym>())
     private var apiService: GymsApiService
-    private lateinit var gymCall: Call<List<Gym>>
 
     init {
         val retrofit: Retrofit = Retrofit.Builder()
@@ -30,16 +30,16 @@ class GymsViewModel(
         apiService = retrofit.create(GymsApiService::class.java)
         getGyms()
     }
-    fun getGyms() = apiService.getGyms().enqueue(object : Callback<List<Gym>>{
-        override fun onResponse(call: Call<List<Gym>>, response: Response<List<Gym>>) {
-            gymCall = apiService.getGyms()
-            response.body()?.let {
-                state = it.restoreSelectedGyms()
-            }
+    private fun getGyms(){
+        viewModelScope.launch {
+            val gyms = getGymsFromRemoteDB()
+            state = gyms.restoreSelectedGyms()
         }
-        override fun onFailure(call: Call<List<Gym>>, t: Throwable) {}
-    })
+    }
 
+    private suspend fun getGymsFromRemoteDB() =  withContext(Dispatchers.IO){
+        apiService.getGyms()
+    }
 
     fun toggleFavouriteState(gymId: Int){
         val gyms = state.toMutableList()
@@ -64,10 +64,5 @@ class GymsViewModel(
             }
         }
         return gyms
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        gymCall.cancel()
     }
 }
